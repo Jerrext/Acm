@@ -1,4 +1,54 @@
+const overflowToggle = (arg) => {
+  if (arg) {
+    document.documentElement.style.overflow = "hidden auto"
+    document.body.style.overflow = "hidden auto"
+  } else {
+    document.documentElement.style.overflow = "hidden"
+    document.body.style.overflow = "hidden"
+  }
+}
+
+const popUpOpen = (window, wrapper, overlay, closeBtn, delay) => {
+  overflowToggle(false)
+  window.style.display = "block"
+
+  setTimeout(() => {
+    overlay.style.opacity = ".8"
+    wrapper.style.opacity = "1"
+    wrapper.style.top = "50%"
+    closeBtn.style.opacity = "0.5"
+  },0)
+
+  if (delay) {
+    setTimeout(() => {
+      popUpClose(window, wrapper, overlay)
+    }, delay)
+  }
+}
+
+const popUpClose = (window, wrapper, overlay, closeBtn) => {
+  setTimeout(() => {
+    window.style.display = ""
+  }, 300)
+  closeBtn.style.opacity = ""
+  overlay.style.opacity = ""
+  wrapper.style.opacity = ""
+  wrapper.style.top = ""
+
+  overflowToggle(true)
+}
+
+const setPopUpVisibility = (visibility, window, wrapper, overlay, closeBtn, delay) => {
+  if (visibility) {
+    popUpOpen(window, wrapper, overlay, closeBtn, delay)
+  } else {
+    popUpClose(window, wrapper, overlay, closeBtn)
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  // Header
+
   const header = document.querySelector(".header")
 
   window.addEventListener("scroll", (e) => {
@@ -8,6 +58,8 @@ document.addEventListener("DOMContentLoaded", () => {
       header.classList.remove("scrollNav")
     }
   })
+
+  // Gallery
 
   const galleryBtnsWrapper = document.querySelector(".gallery__btns-wrapper")
   const galleryBtnMore = document.querySelector(".gallery__btn-more")
@@ -36,6 +88,129 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     galleryBtnsWrapper.style.display = "none"
   }
+
+  // Map
+
+  const map = document.querySelector(".contacts__map iframe")
+  map.style.width = "100%"
+  map.style.height = "100%"
+
+  // Services
+
+  document.querySelectorAll(".services__item").forEach((item,index) => item.dataset.number = index + 1)
+
+  // Popup View
+
+  const popupView = document.querySelector(".popup-view")
+  const popupViewIWindow = document.querySelector(".popup-view__window")
+  const overlayView = document.querySelector(".popup-view__overlay")
+  const closeBtnView = document.querySelector(".popup-view__close")
+  const prevBtnView = document.querySelector(".popup-view__prev")
+  const nextBtnView = document.querySelector(".popup-view__next")
+
+  const img = document.querySelector(".popup-view__img")
+  const imgTitle = document.querySelector(".popup-view__title")
+  const imgDescription = document.querySelector(".popup-view__description")
+  const parentTextContainer = imgTitle.parentElement
+
+  const galleryItems = [...document.querySelectorAll(".gallery__grid-item")]
+
+  const galleryList = galleryItems.map((item, index)=> {
+    return {
+      id: index,
+      img: item.firstElementChild.src,
+      title: item.firstElementChild.nextElementSibling.textContent,
+      description: item.lastElementChild.innerHTML,
+    }
+  })
+
+  let currentViewIndex
+
+  const openViewWindow = (id) => {
+    if (id === 0) {
+      prevBtnView.style.display = "none"
+    } else if (id < 0) {
+      return
+    } else if (id === galleryList.length - 1) {
+      nextBtnView.style.display = "none"
+    } else if (id > galleryList.length - 1) {
+      return
+    } else {
+      prevBtnView.style.display = "flex"
+      nextBtnView.style.display = "flex"
+    }
+
+    currentViewIndex = id
+
+    const currentItem = galleryList.find(work => work.id === id)
+
+    if (!currentItem.title && !currentItem.description) {
+      parentTextContainer.style.padding = "0"
+      popupViewIWindow.style.width = "unset"
+    } else {
+      parentTextContainer.style.padding = "50px 20px"
+      popupViewIWindow.style.width = "100%"
+    }
+
+    img.src = currentItem.img
+    imgTitle.textContent = currentItem.title
+    imgDescription.innerHTML = currentItem.description
+  }
+
+  prevBtnView.addEventListener("click", () => openViewWindow(currentViewIndex - 1))
+  nextBtnView.addEventListener("click", () => openViewWindow(currentViewIndex + 1))
+
+  galleryItems.forEach((item, index) => {
+    item.dataset.index = index
+
+    item.addEventListener("click", () => {
+      openViewWindow(+item.dataset.index)
+      setPopUpVisibility(true, popupView, popupViewIWindow, overlayView, closeBtnView)
+    })
+  })
+
+  closeBtnView.addEventListener("click", () => setPopUpVisibility(false, popupView, popupViewIWindow, overlayView, closeBtnView))
+  overlayView.addEventListener("click", () => setPopUpVisibility(false, popupView, popupViewIWindow, overlayView, closeBtnView))
+
+  // Burger
+
+  const burger = document.querySelector(".burger")
+  const burgerMenu = document.querySelector(".burger-menu")
+
+  // const burgerMenuClose = () => {
+  //   burgerMenu.style.left = ""
+
+  //   setTimeout(() => {
+  //     burger.style.display = ""
+  //   }, 500);
+    
+  //   overflowToggle(true)
+  // }
+
+  // const burgerMenuOpen = () => {
+  //   burger.style.display = "block"
+
+  //   setTimeout(() => {
+  //     burgerMenu.style.left = "0"
+  //   }, 0);
+
+  //   overflowToggle(false)
+  // }
+
+  // window.addEventListener('resize',(e) => {
+  //   const width = document.body.clientWidth;
+  //   if (width > 1300) {
+  //     burgerMenuClose()
+  //   }
+  // });
+
+  // document.querySelector(".header__burger-btn").addEventListener("click", burgerMenuOpen)
+  // // document.querySelector(".header__burger-close-btn").addEventListener("click", burgerMenuClose)
+  // document.querySelectorAll(".burger .header__nav-list-link").forEach(item => {
+  //   item.addEventListener("click", burgerMenuClose)
+  // })
+
+
 })
 
 const swiper1 = new Swiper('.banner__swiper', {
@@ -56,130 +231,5 @@ const swiper1 = new Swiper('.banner__swiper', {
   },
 });
 
-// const swiper2 = new Swiper('.testimonial__swiper', {
-//   slidesPerView: 1.7,
-//   spaceBetween: 11,
-//   simulateTouch: false,
-//   autoplay: {
-//     delay: 5000,
-//   },
-//   pagination: {
-//     el: ".testimonial__swiper-pagination",
-//     clickable: true,
-//     renderBullet: function (index, className) {
-//       return `<span class="${className}"></span>`;
-//     },
-//   },
-//   navigation: {
-//     nextEl: ".testimonial__swiper-button-next",
-//     prevEl: ".testimonial__swiper-button-prev",
-//   },
-//   breakpoints: {
-//     1100: {
-//       slidesPerView: 5,
-//       spaceBetween: 24,
-//     },
-//     900: {
-//       slidesPerView: 4,
-//     },
-//     600: {
-//       slidesPerView: 3,
-//       spaceBetween: 15,
-//     },
-//   },
-// });
 
-const overflowToggle = (arg) => {
-  if (arg) {
-    document.documentElement.style.overflow = "hidden auto"
-    document.body.style.overflow = "hidden auto"
-  } else {
-    document.documentElement.style.overflow = "hidden"
-    document.body.style.overflow = "hidden"
-  }
-}
 
-const popUpOpen = (window, wrapper, overlay, delay) => {
-  overflowToggle(false)
-  window.style.display = "block"
-
-  setTimeout(() => {
-    overlay.style.opacity = ".5"
-    wrapper.style.opacity = "1"
-    wrapper.style.top = "50%"
-  },0)
-
-  if (delay) {
-    setTimeout(() => {
-      popUpClose(window, wrapper, overlay)
-    }, delay)
-  }
-}
-
-const popUpClose = (window, wrapper, overlay) => {
-  setTimeout(() => {
-    window.style.display = ""
-  }, 300)
-  overlay.style.opacity = ""
-  wrapper.style.opacity = ""
-  wrapper.style.top = ""
-
-  overflowToggle(true)
-}
-
-const setPopUpVisibility = (visibility, window, wrapper, overlay, delay) => {
-  if (visibility) {
-    popUpOpen(window, wrapper, overlay, delay)
-  } else {
-    popUpClose(window, wrapper, overlay)
-  }
-}
-
-const popupView = document.querySelector(".popup-view")
-const popupViewImg = document.querySelector(".popup-view__img")
-const overlayView = document.querySelector(".popup-view__overlay")
-
-document.querySelectorAll(".gallery__grid-item").forEach(item => {
-  item.addEventListener("click", () => {
-    const imgSrs = item.firstElementChild.src
-    const img = document.querySelector(".popup-view__img")
-    img.src = imgSrs.replace(".jpg", "-large.jpg")
-    setPopUpVisibility(true, popupView, popupViewImg, overlayView)
-  })
-})
-
-const burger = document.querySelector(".burger")
-const burgerMenu = document.querySelector(".burger-menu")
-
-const burgerMenuClose = () => {
-  burgerMenu.style.left = ""
-
-  setTimeout(() => {
-    burger.style.display = ""
-  }, 500);
-  
-  overflowToggle(true)
-}
-
-const burgerMenuOpen = () => {
-  burger.style.display = "block"
-
-  setTimeout(() => {
-    burgerMenu.style.left = "0"
-  }, 0);
-
-  overflowToggle(false)
-}
-
-window.addEventListener('resize',(e) => {
-  const width = document.body.clientWidth;
-  if (width > 1300) {
-    burgerMenuClose()
-  }
-});
-
-document.querySelector(".header__burger-btn").addEventListener("click", burgerMenuOpen)
-// document.querySelector(".header__burger-close-btn").addEventListener("click", burgerMenuClose)
-document.querySelectorAll(".burger .header__nav-list-link").forEach(item => {
-  item.addEventListener("click", burgerMenuClose)
-})
