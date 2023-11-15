@@ -26,7 +26,7 @@ const popUpOpen = (window, wrapper, overlay, closeBtn, delay) => {
   }
 }
 
-const popUpClose = (window, wrapper, overlay, closeBtn) => {
+const popUpClose = (window, wrapper, overlay, closeBtn) => {  
   setTimeout(() => {
     window.style.display = ""
   }, 300)
@@ -112,7 +112,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const imgTitle = document.querySelector(".popup-view__title")
   const imgDescription = document.querySelector(".popup-view__description")
   const parentTextContainer = imgTitle.parentElement
-
+  const parentImgContainer = img.parentElement
+  
   const galleryItems = [...document.querySelectorAll(".gallery__grid-item")]
 
   const galleryList = galleryItems.map((item, index)=> {
@@ -123,6 +124,11 @@ document.addEventListener("DOMContentLoaded", () => {
       description: item.lastElementChild.innerHTML,
     }
   })
+
+  window.addEventListener('popstate', function(e) {
+    setPopUpVisibility(false, popupView, popupViewIWindow, overlayView, closeBtnView)
+    burgerMenuClose()
+  }, false);
 
   let currentViewIndex
 
@@ -145,9 +151,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentItem = galleryList.find(work => work.id === id)
 
     if (!currentItem.title && !currentItem.description) {
-      parentTextContainer.style.padding = "0"
       popupViewIWindow.style.width = "unset"
+      parentTextContainer.style.display = "none"
+      if (document.body.clientWidth < 600) parentImgContainer.style.maxHeight = ""
     } else {
+      parentTextContainer.style.display = "block"
+      if (document.body.clientWidth < 600) parentImgContainer.style.maxHeight = "400px"
       parentTextContainer.style.padding = "50px 20px"
       popupViewIWindow.style.width = "100%"
     }
@@ -155,6 +164,11 @@ document.addEventListener("DOMContentLoaded", () => {
     img.src = currentItem.img
     imgTitle.textContent = currentItem.title
     imgDescription.innerHTML = currentItem.description
+  }
+
+  const closeViewWindow = () => {
+    window.history.back();
+    setPopUpVisibility(false, popupView, popupViewIWindow, overlayView, closeBtnView)
   }
 
   prevBtnView.addEventListener("click", () => openViewWindow(currentViewIndex - 1))
@@ -165,52 +179,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
     item.addEventListener("click", () => {
       openViewWindow(+item.dataset.index)
+      window.history.pushState({popup: 1}, "popup","#popup")
       setPopUpVisibility(true, popupView, popupViewIWindow, overlayView, closeBtnView)
     })
   })
 
-  closeBtnView.addEventListener("click", () => setPopUpVisibility(false, popupView, popupViewIWindow, overlayView, closeBtnView))
-  overlayView.addEventListener("click", () => setPopUpVisibility(false, popupView, popupViewIWindow, overlayView, closeBtnView))
+  closeBtnView.addEventListener("click", closeViewWindow)
+  overlayView.addEventListener("click", closeViewWindow)
 
   // Burger
 
   const burger = document.querySelector(".burger")
-  const burgerMenu = document.querySelector(".burger-menu")
 
-  // const burgerMenuClose = () => {
-  //   burgerMenu.style.left = ""
+  const burgerMenuClose = () => {
+    burger.style.left = ""
 
-  //   setTimeout(() => {
-  //     burger.style.display = ""
-  //   }, 500);
+    setTimeout(() => {
+      burger.style.display = ""
+    }, 500);
     
-  //   overflowToggle(true)
-  // }
+    overflowToggle(true)
+  }
 
-  // const burgerMenuOpen = () => {
-  //   burger.style.display = "block"
+  const burgerMenuOpen = () => {
+    window.history.pushState({menu: 1}, "menu","#menu")
 
-  //   setTimeout(() => {
-  //     burgerMenu.style.left = "0"
-  //   }, 0);
+    burger.style.display = "block"
 
-  //   overflowToggle(false)
-  // }
+    setTimeout(() => {
+      burger.style.left = "0"
+    }, 0);
 
-  // window.addEventListener('resize',(e) => {
-  //   const width = document.body.clientWidth;
-  //   if (width > 1300) {
-  //     burgerMenuClose()
-  //   }
-  // });
+    overflowToggle(false)
+  }
 
-  // document.querySelector(".header__burger-btn").addEventListener("click", burgerMenuOpen)
-  // // document.querySelector(".header__burger-close-btn").addEventListener("click", burgerMenuClose)
-  // document.querySelectorAll(".burger .header__nav-list-link").forEach(item => {
-  //   item.addEventListener("click", burgerMenuClose)
-  // })
+  window.addEventListener('resize',(e) => {
+    const width = document.body.clientWidth;
+    if (width > 800) {
+      burgerMenuClose()
+    }
+  });
 
-
+  document.querySelector(".header__burger-btn").addEventListener("click", burgerMenuOpen)
+  document.querySelector(".header__burger-close-btn").addEventListener("click", () => {
+    burgerMenuClose()
+    window.history.back()
+  })
+  document.querySelectorAll(".burger__nav-link").forEach(item => {
+    item.addEventListener("click", burgerMenuClose)
+  })
 })
 
 const swiper1 = new Swiper('.banner__swiper', {
