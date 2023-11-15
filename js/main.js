@@ -204,7 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const burgerMenuOpen = () => {
     window.history.pushState({menu: 1}, "menu","#menu")
 
-    burger.style.display = "block"
+    burger.style.display = "flex"
 
     setTimeout(() => {
       burger.style.left = "0"

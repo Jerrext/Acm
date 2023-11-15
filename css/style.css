@@ -471,6 +471,7 @@ p > span {
   transition: var(--transition);
   display: none;
   background-color: var(--secondary-bg-color);
+  flex-direction: column;
 }
 
 .burger__header {
@@ -480,7 +481,7 @@ p > span {
 
 .burger__content {
   width: 100%;
-  height: 100%;
+  flex: 1;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -502,7 +503,6 @@ p > span {
 .burger__navigation {
   position: relative;
   z-index: 5;
-  transform: translateY(-40px);
 }
 
 .burger__nav-list {
